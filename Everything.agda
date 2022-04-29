@@ -6,7 +6,7 @@ module Everything where
 -- Authors: Niccolo Veltri and Niels Voorneveld
 -- The comments make explicit reference to sections, definitions, examples,
 -- and results from this paper.
--- Code compiles in version 2.6.1
+-- Code compiles in Agda version 2.6.1
 
 
 -- Formulation of our treatment of relations
