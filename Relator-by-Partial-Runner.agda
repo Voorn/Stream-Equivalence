@@ -31,7 +31,9 @@ Maybe-mor = FT-mor Sg-ε
 ≡xR A R (a , x) (b , y) = (a ≡ b) × (R x y)
 
 
-
+≡xR-nat : {X₀ X₁ Y₀ Y₁ : Set} → (f : X₀ → X₁) → (g : Y₀ → Y₁) → (A : Set)
+  → (R : Rela X₁ Y₁) → Rela-< (λ (a , x') (b , y') → ≡xR A R (a , f x') (b , g y')) (≡xR A (λ x y → R (f x) (g y)))
+≡xR-nat f g A R a b (fst , snd) = fst , snd
 
 -- Example 4. Stateful relators
 
@@ -47,6 +49,17 @@ Run-map S (A , θ) X a (leaf x) = leaf (a , x)
 Run-map S (A , θ) X a (node σ ts) with (θ σ a)
 ... | bott = bott
 ... | leaf (a' , i) = Run-map S (A , θ) X a' (ts i)
+
+Run-map-nat : (S : Sig) → (Θ : Runner S)
+  → {X Y : Set} → (f : X → Y) → (s : proj₁ Θ) → (a : FT S X)
+  → (Run-map S Θ _ s (FT-mor S f a)) ≡ FT-mor (Sg-ε) (λ (s' , x') → (s' , f x')) (Run-map S Θ _ s a)
+Run-map-nat S (A , θ) f s bott = refl
+Run-map-nat S (A , θ) f s (leaf x) = refl
+Run-map-nat S (A , θ) f s (node op ts) with (θ op s)
+... | bott = refl
+... | leaf (s' , j) = Run-map-nat S (A , θ) f s' (ts j)
+
+
 
 Run-κ :  (S : Sig) → ((A , θ) : Runner S) 
   → (X Y : Set) → (f : X → FT S Y) → (t : FT S X) → (a : A) →
@@ -113,6 +126,8 @@ Run-κ S (A , θ) X Y f (node op ts) a with θ op a
 Γ-run-is-bott : (S : Sig) → (Θ : Runner S) → T-Relator-bott S (Γ-run S Θ)
 Γ-run-is-bott S Θ R t a = rel-bott (Run-map S Θ _ a t)
 
+
+
 -- Lemma 4. Stateful relators are sufficient
 Γ-run-is-Relator : (S : Sig) → (Θ : Runner S) → T-Relator-prop S (Γ-run S Θ)
 Γ-run-is-Relator S Θ =
@@ -122,6 +137,17 @@ Run-κ S (A , θ) X Y f (node op ts) a with θ op a
   Γ-run-is-η S Θ ,
   Γ-run-is-κ S Θ ,
   Γ-run-is-bott S Θ
+
+
+-- Lemma 4 extra: naturality of Stateful relators
+Γ-run-is-nat> : (S : Sig) → (Θ : Runner S) → T-Relator-nat> S (Γ-run S Θ)
+Γ-run-is-nat> S Θ f g R a b a<b s =  FT-is-ord Sg-ε
+   (λ (a , x') (b , y') → ≡xR (proj₁ Θ) R (a , f x') (b , g y'))
+   (≡xR (proj₁ Θ) (λ x y → R (f x) (g y))) (≡xR-nat f g (proj₁ Θ) R)
+   (Run-map S (proj₁ Θ , proj₂ Θ) _ s a) (Run-map S (proj₁ Θ , proj₂ Θ) _ s b)
+   (FT-is-nat> Sg-ε (λ (a , x') → a , f x') (λ (b , y') → b , g y') (≡xR (proj₁ Θ) R)
+   (Run-map S (proj₁ Θ , proj₂ Θ) _ s a) (Run-map S (proj₁ Θ , proj₂ Θ) _ s b)
+   (subst₂ (Γ-Maybe (≡xR (proj₁ Θ) R)) (Run-map-nat S Θ f s a) (Run-map-nat S Θ g s b) (a<b s) ))
 
 
 

@@ -37,10 +37,14 @@ T-Relator-nat : (S : Sig) → T-Relator S → Set₁
 T-Relator-nat S Γ = {X₀ X₁ Y₀ Y₁ : Set} → (f : X₀ → X₁) → (g : Y₀ → Y₁) → (R : Rela X₁ Y₁)
   → Rela-≡ (Γ (λ x y → R (f x) (g y))) (λ a b → Γ R (FT-mor S f a) (FT-mor S g b))
 
+-- Naturality in both directions
 T-Relator-nat< : (S : Sig) → T-Relator S → Set₁
 T-Relator-nat< S Γ = {X₀ X₁ Y₀ Y₁ : Set} → (f : X₀ → X₁) → (g : Y₀ → Y₁) → (R : Rela X₁ Y₁)
   → Rela-< (Γ (λ x y → R (f x) (g y))) (λ a b → Γ R (FT-mor S f a) (FT-mor S g b))
 
+T-Relator-nat> : (S : Sig) → T-Relator S → Set₁
+T-Relator-nat> S Γ = {X₀ X₁ Y₀ Y₁ : Set} → (f : X₀ → X₁) → (g : Y₀ → Y₁) → (R : Rela X₁ Y₁)
+  → Rela-< (λ a b → Γ R (FT-mor S f a) (FT-mor S g b)) (Γ (λ x y → R (f x) (g y)))
 
 -- Auxiliary properties that can be proven
 T-Relator-tran : (S : Sig) → T-Relator S → Set₁
@@ -149,7 +153,9 @@ T-Relator-prop⇒bott : {S : Sig} → {Γ : T-Relator S} → T-Relator-prop S Γ
   → T-Relator-bott S Γ
 T-Relator-prop⇒bott (a , b , c , d , e , f) = f
 
-
+T-Relator-prop⇒nat< :  (S : Sig) → (Γ : T-Relator S) → T-Relator-prop S Γ
+  → T-Relator-nat< S Γ
+T-Relator-prop⇒nat< S Γ ΓP = T-Relator-ηκ⇒nat< S Γ (T-Relator-prop⇒η ΓP) (T-Relator-prop⇒κ ΓP)
 
 
 -- Lemma 2. The syntactic relator is a sufficient relator
@@ -196,6 +202,13 @@ FT-is-Relator S = FT-is-ref S , FT-is-com S , FT-is-ord S ,
   FT-is-η S , FT-is-κ S , FT-is-bott S
 
 
+FT-is-nat> : (S : Sig) → T-Relator-nat> S FT-relat
+FT-is-nat> S f g R bott b Fa<Gb = rel-bott b
+FT-is-nat> S f g R (leaf x) (leaf y) (rel-leaf .(f x) .(g y) fxRgy) = rel-leaf x y fxRgy
+FT-is-nat> S f g R (node op ts) (node .op ts₁) (rel-node .op .(λ i → FT-mor S f (ts i)) .(λ i → FT-mor S g (ts₁ i)) ks)
+  = rel-node op ts ts₁ λ i → FT-is-nat> S f g R (ts i) (ts₁ i) (ks i)
+
+
 FT-is-Minimal : (S : Sig) → (Ψ : T-Relator S) → T-Relator-prop S Ψ
   → {X Y : Set} → (R : Rela X Y) → Rela-< (FT-relat R) (Ψ R)
 FT-is-Minimal S Ψ ΨP R bott b a<b = T-Relator-prop⇒bott ΨP R b
@@ -223,6 +236,8 @@ data FT-ND {S : Sig} {X Y : Set} (R : Rela X Y) : Rela (FT S X) (FT S Y) where
   ND-node : (op : proj₁ S) → (ac : proj₂ S op → FT S X) → (b : FT S Y)
     → ((i : proj₂ S op) → FT-ND R (ac i) b)
     → FT-ND R (node op ac) b
+
+
 
 
 -- Alternative formulation
@@ -343,6 +358,23 @@ FT-ND-bott S R b = ND-bott b
 FT-ND-is-Relator :  (S : Sig) → T-Relator-prop S FT-ND
 FT-ND-is-Relator S = (FT-ND-ref S) , (FT-ND-com S) , (FT-ND-ord S) ,
   (FT-ND-η S) , (FT-ND-κ S) , (FT-ND-bott S)
+
+
+
+FT-mem-nat : (S : Sig) → {X₀ X₁ Y₀ Y₁ : Set} → (f : X₀ → X₁) → (g : Y₀ → Y₁) → (R : Rela X₁ Y₁)
+  → (x : X₀) → (b : FT S Y₀) → FT-mem {S} R (f x) (FT-mor S g b)
+  → FT-mem {S} (λ x' y → R (f x') (g y)) x b
+FT-mem-nat S f g R x (leaf y) (mem-leaf .(f x) .(g y) fx-R-gy) = mem-leaf x y fx-R-gy
+FT-mem-nat S f g R x (node op ts) (mem-node .op .(f x) .(λ i → FT-mor S g (ts i)) (j , x∈tj)) = mem-node op x ts (j , FT-mem-nat S f g R x (ts j) x∈tj)
+
+
+-- Lemma 3 extra: naturality of nondeterministic relator
+FT-ND-is-nat> : (S : Sig) → T-Relator-nat> S FT-ND
+FT-ND-is-nat> S f g R bott b Tfa-R-Tgb = T-Relator-prop⇒bott (FT-ND-is-Relator S) (λ x y → R (f x) (g y)) b
+FT-ND-is-nat> S f g R (leaf x) b (ND-leaf .(f x) .(FT-mor S g b) x₁) = ND-leaf x b (FT-mem-nat S f g R x b x₁)
+FT-ND-is-nat> S f g R (node op ts) b (ND-node .op .(λ i → FT-mor S f (ts i)) .(FT-mor S g b) ks) = ND-node op ts b (λ i →
+  (FT-ND-is-nat> S f g R) (ts i) b (ks i))
+
 
 
 -- Extra: Intersection of relators

@@ -23,7 +23,7 @@ open import CBPV-Precong
 open import CBPV-substitution
 
 
--- Definition: what is soundness with respect to small-step operational semantics
+-- Definition: what is soundness with respect to small-step operational semantics?
 Soundness : Prog-rel → Set
 Soundness R = (τ : Ty cpt) → ((ρ , St , t) : Stackpair τ)
   → R ε cpt τ (appStack St t) (stack-step-algebra τ (stack-step τ (ρ , St , t)))
