@@ -52,7 +52,8 @@ Run-map S (A , θ) X a (node σ ts) with (θ σ a)
 
 Run-map-nat : (S : Sig) → (Θ : Runner S)
   → {X Y : Set} → (f : X → Y) → (s : proj₁ Θ) → (a : FT S X)
-  → (Run-map S Θ _ s (FT-mor S f a)) ≡ FT-mor (Sg-ε) (λ (s' , x') → (s' , f x')) (Run-map S Θ _ s a)
+  → (Run-map S Θ _ s (FT-mor S f a)) ≡ FT-mor (Sg-ε) (λ (s' , x') → (s' , f x'))
+             (Run-map S Θ _ s a)
 Run-map-nat S (A , θ) f s bott = refl
 Run-map-nat S (A , θ) f s (leaf x) = refl
 Run-map-nat S (A , θ) f s (node op ts) with (θ op s)
@@ -211,3 +212,14 @@ proj₁ Tick-Runner = ℕ
 proj₂ Tick-Runner zero k = leaf (k , zero)
 proj₂ Tick-Runner (suc σ) zero = bott
 proj₂ Tick-Runner (suc σ) (suc k) = proj₂ Tick-Runner σ k
+
+
+-- Count-down
+Sg-CD : SigF
+Sg-CD = (⊤ ⊎ ℕ) , λ { (inj₁ x) → 2 ; (inj₂ n) → 1}
+
+CD-Runner : Runner (Sig-Fin Sg-CD)
+proj₁ CD-Runner = ℕ
+proj₂ CD-Runner (inj₁ x) zero = leaf (zero , zero)
+proj₂ CD-Runner (inj₁ x) (suc n) = leaf (n , (suc zero))
+proj₂ CD-Runner (inj₂ m) n = leaf (m , zero)

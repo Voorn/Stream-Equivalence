@@ -1,4 +1,6 @@
-module CBPV-Order where
+open import S-Trees
+
+module CBPV-Order (SgF : SigF) where
 
 open import Relation.Binary.PropositionalEquality
 open import Data.Sum renaming (map to map⊎)
@@ -10,9 +12,8 @@ open import Function hiding (_⟶_)
 open import Data.Fin hiding (_+_)
 
 
-open import S-Trees
 open import Cat-Rel
-open import CBPV
+open import CBPV SgF
 open import Relator
 
 

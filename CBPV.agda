@@ -10,9 +10,7 @@ open import Data.Fin hiding (lift)
 open import S-Trees
 open import Cat-Rel
 
-module CBPV  where
-
-postulate SgF : SigF
+module CBPV (SgF : SigF) where
 
 Sig-ob = proj₁ (Sig-Fin SgF)
 Sig-num = proj₂ SgF

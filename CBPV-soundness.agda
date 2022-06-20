@@ -1,4 +1,6 @@
-module CBPV-soundness where
+open import S-Trees
+
+module CBPV-soundness (SgF : SigF) where
 
 open import Relation.Binary.PropositionalEquality
 open import Data.Sum renaming (map to map⊎)
@@ -11,16 +13,16 @@ open import Data.Fin hiding (_+_)
 
 
 
-open import S-Trees
 open import Cat-Rel
 open import Stream
-open import CBPV
 open import Relator
-open import CBPV-Order
-open import CBPV-Precong
+
+open import CBPV SgF
+open import CBPV-Order SgF
+open import CBPV-Precong SgF
 
 -- Important precursor:
-open import CBPV-substitution
+open import CBPV-substitution SgF
 
 
 -- Definition: what is soundness with respect to small-step operational semantics?

@@ -55,3 +55,8 @@ import CBPV-substitution
 
 -- Theorem 2. Soundness of the behavioural relation
 import CBPV-soundness
+
+
+-- Examples from Section 5.1, differences between programs
+import Example-fine-grained
+import Example-fine-grained-2
